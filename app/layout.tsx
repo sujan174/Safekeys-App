@@ -1,16 +1,6 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { cn } from "@/lib/utils"; // Importing the cn utility
+import {ThemeProvider} from "@/components/theme-provider"
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -24,10 +14,38 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+  {/* Google Fonts */}
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossOrigin="anonymous"
+  />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+  {/* Tailwind CDN */}
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  {/* External Tailwind config */}
+  <script src="/tailwind.config.js"></script>
+</head>
+
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        // Use the cn utility to apply the font-sans class, which now uses Plus Jakarta Sans
+        className={cn("min-h-screen bg-dark-300 font-sans antialiased")}
       >
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
         {children}
+        </ThemeProvider>
       </body>
     </html>
   );
