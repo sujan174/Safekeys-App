@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation"; // --- IMPROVEMENT: Import useRouter
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -21,19 +22,19 @@ interface Secret {
 }
 
 const DashboardPage = () => {
-  // State for secrets, loading, and errors
+  const router = useRouter(); // --- IMPROVEMENT: Initialize router for navigation
   const [secrets, setSecrets] = useState<Secret[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-const fetchSecrets = async () => {
+  const fetchSecrets = async () => {
     const serverUrl = sessionStorage.getItem("serverUrl");
     const apiKey = sessionStorage.getItem("apiKey");
 
     if (!serverUrl || !apiKey) {
-      window.location.href = "/login";
+      router.push("/login"); // --- IMPROVEMENT: Use router for smoother navigation
       return;
-      }
+    }
 
     try {
       const response = await fetch(`${serverUrl}/secrets`, {
@@ -43,39 +44,42 @@ const fetchSecrets = async () => {
       });
 
       if (!response.ok) {
-         throw new Error("Failed to fetch secrets. Please log in again.");
+        throw new Error("Failed to fetch secrets. Please log in again.");
       }
 
       const data = await response.json();
-       const secretsArray = Object.entries(data).map(([id, secret]: [string, any]) => ({
-         ...secret,
-         id,
-       }));
+      const secretsArray = Object.entries(data).map(
+        ([id, secret]: [string, any]) => ({
+          ...secret,
+          id,
+        })
+      );
       setSecrets(secretsArray);
-
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) { // --- FIX: Wrapped catch block in curly braces and improved type safety
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unexpected error occurred.");
+      }
     } finally {
       setIsLoading(false);
     }
-   };
-
+  };
 
   useEffect(() => {
-    
     fetchSecrets();
-  }, []); 
+  }, []);
 
   const handleLogout = () => {
     sessionStorage.removeItem("serverUrl");
     sessionStorage.removeItem("apiKey");
     console.log("Logging out and clearing session...");
-    window.location.href = "/login";
+    router.push("/login"); // --- IMPROVEMENT: Use router for smoother navigation
   };
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center p-4">
-      <Card className="w-full max-w-4xl">
+    <div className="flex min-h-screen w-full items-start  bg-gray-950 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))] p-4">
+      <Card className="w-full max-w-4xl border-0 bg-background/60 shadow-xl backdrop-blur-sm">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle className="text-3xl">Secrets Vault</CardTitle>
@@ -99,9 +103,9 @@ const fetchSecrets = async () => {
               <p>{error}</p>
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-lg border">
+            <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-muted/50">
+                <thead className="border-b border-white/10">
                   <tr className="text-left">
                     <th className="p-3 font-medium">Description</th>
                     <th className="p-3 font-medium">File</th>
@@ -111,7 +115,7 @@ const fetchSecrets = async () => {
                 <tbody>
                   {secrets.length > 0 ? (
                     secrets.map((secret) => (
-                      <tr key={secret.id} className="border-t">
+                      <tr key={secret.id} className="border-t border-white/10">
                         <td className="p-3">{secret.Description}</td>
                         <td className="p-3 font-mono">{secret.File}</td>
                         <td className="p-3 text-muted-foreground">
@@ -120,8 +124,11 @@ const fetchSecrets = async () => {
                       </tr>
                     ))
                   ) : (
-                    <tr className="border-t">
-                      <td colSpan={3} className="p-8 text-center text-muted-foreground">
+                    <tr className="border-t border-white/10">
+                      <td
+                        colSpan={3}
+                        className="p-8 text-center text-muted-foreground"
+                      >
                         No secrets found in the vault.
                       </td>
                     </tr>
@@ -137,4 +144,3 @@ const fetchSecrets = async () => {
 };
 
 export default DashboardPage;
-
