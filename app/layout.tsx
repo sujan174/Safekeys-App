@@ -31,7 +31,6 @@ export default function RootLayout({
   <script src="https://cdn.tailwindcss.com"></script>
 
   {/* External Tailwind config */}
-  <script src="/tailwind.config.js"></script>
 </head>
 
       <body
